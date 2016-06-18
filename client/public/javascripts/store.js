@@ -45,61 +45,38 @@ bindData:{},
          window.localStorage.clear();
          this.trigger();
        },
-
-       onSearchAndDisplayMovie : function(value){
+       onAddBlogToDB : function(value){
+         console.log("in store");
          console.log(value);
          $.ajax({
-           url: '/displaymovies',
-           data: value,
-           type: 'post',
-           success:function(data){
+                url: '/Blog/addBlog',
+                type:'post',
+                data: value,
+                success: function(data1) {
+                  console.log(data1);
+                  this.trigger(data1);
+                }.bind(this)
+              });
+       },
+       onFetchAllBlogsFromDB : function(){
+         $.ajax({
+           url: '/Blog/fetchBlog',
+           type: 'get',
+           success : function(data){
              console.log(data);
-             this.bindData = data;
-             console.log(this.bindData);
-             this.trigger(this.bindData);
+             this.trigger(data);
            }.bind(this)
          })
        },
-
-       onSearchAndAddToDb : function(value){
-         console.log(value);
+       onLikedBlog : function(value){
          $.ajax({
-             url:'/addToDB/addDB',
-             data:"Name="+value,
-             type:'post',
-             dataType: 'json',
-             cache: false,
-             success: function(e) {
-               console.log(e);
-               this.data2.msg = e;
-               this.trigger(this.data2.msg);
-             }.bind(this)
-             });
-       },
-
-       onDeleteSelectedMv : function(value){
-         $.ajax({
-           url: '/DeleteSelectedMovie',
-           type: 'post',
-           data : 'movieDeleteObj='+value,
-           success:function(data)
-           {
+           url:'/Like/setLike',
+           type : 'post',
+           data : value,
+           success : function(data){
              console.log(data);
-             
            }
-          })
-       },
-
-       onFetchMovieCont : function(){
-         $.ajax({
-           url: '/addMovie',
-           type: 'get',
-           success:function(data){
-
-             this.trigger(data);
-           }.bind(this)
-         });
+         })
        }
-
   });
 module.exports =store;

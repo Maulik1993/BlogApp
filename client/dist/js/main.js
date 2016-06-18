@@ -26348,10 +26348,9 @@ var actionComponent = Reflux.createActions([
   "handleRegistrationForm",
   "handleLoginAuth",
   "logOut",
-  "searchAndDisplayMovie",
-  "searchAndAddToDb",
-  "deleteSelectedMv",
-  "fetchMovieCont"
+  "addBlogToDB",
+  "fetchAllBlogsFromDB",
+  "likedBlog"
 ]);
 
 module.exports = actionComponent;
@@ -26397,7 +26396,11 @@ var Navbar =React.createClass({displayName: "Navbar",
            React.createElement("span", {className: "icon-bar"}), 
            React.createElement("span", {className: "icon-bar"})
          ), 
-          React.createElement("a", {className: "navbar-brand"}, React.createElement(Link, {to: "/home"}, "For You"))
+         window.localStorage.getItem('username')==null?
+         React.createElement(Link, {to: "/HomeForStranger", className: "navbar-brand"}, "For You")
+       :React.createElement(Link, {to: "/HomeForRegisterUser", className: "navbar-brand"}, "For You")
+     
+
         ), 
       			React.createElement("div", {className: "collapse navbar-collapse", id: "bs-example-navbar-collapse-1"}, 
                 
@@ -26419,12 +26422,137 @@ var Navbar =React.createClass({displayName: "Navbar",
   }
 });
 
-var Home = React.createClass({displayName: "Home",
+var HomeForRegisterUser = React.createClass({displayName: "HomeForRegisterUser",
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      result : []
+    }
+  },
+  onStore : function(data){
+    console.log("in onSotre");
+    console.log(data);
+    this.setState({result:data})
+  },
+  fetchAllBlogs : function(){
+    actions.fetchAllBlogsFromDB();
+  },
+  componentDidMount : function(){
+    this.fetchAllBlogs();
+  },
   render : function(){
     return(
       React.createElement("div", null, 
-      React.createElement("h2", null, 
-      "Blogss are on the wayyyyyyyy-------------------"
+      
+        this.state.result.map(function(result){
+        return(
+        React.createElement("div", {className: "container-fluid"}, 
+          React.createElement("div", {className: "row"}, 
+            React.createElement("div", {className: "col-md-12"}, 
+              React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "col-md-8"}, 
+                React.createElement("div", {className: "jumbotron"}, 
+                      React.createElement("h5", null, result.Username), 
+                      React.createElement("span", null, result.Timing), 
+                      React.createElement("h2", null, result.Title), 
+                      React.createElement("figure", null, 
+                          React.createElement("img", {src: "images/"+result.Images, alt: result.Title}), 
+                          React.createElement("figcaption", null, result.Caption)
+                      ), 
+                      React.createElement("p", null, React.createElement("strong", null, "Note:"), result.Description), 
+                      React.createElement(ButtonClick, {results: result})
+                )
+                )
+            )
+          )
+        )
+      )
+    )
+  }
+)
+      )
+    );
+  }
+});
+
+
+
+var HomeForStranger = React.createClass({displayName: "HomeForStranger",
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      result : []
+    }
+  },
+  onStore : function(data){
+    console.log("in onSotre");
+    console.log(data);
+    this.setState({result:data})
+  },
+  fetchAllBlogs : function(){
+    actions.fetchAllBlogsFromDB();
+  },
+  componentDidMount : function(){
+    this.fetchAllBlogs();
+  },
+  render : function(){
+    return(
+      React.createElement("div", null, 
+      
+        this.state.result.map(function(result){
+        return(
+        React.createElement("div", {className: "container-fluid"}, 
+          React.createElement("div", {className: "row"}, 
+            React.createElement("div", {className: "col-md-12"}, 
+              React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "col-md-8"}, 
+                React.createElement("div", {className: "jumbotron"}, 
+                      React.createElement("h5", null, result.Username), 
+                      React.createElement("span", null, result.Timing), 
+                      React.createElement("h2", null, result.Title), 
+                      React.createElement("figure", null, 
+                          React.createElement("img", {src: "images/"+result.Images, alt: result.Title}), 
+                          React.createElement("figcaption", null, result.Caption)
+                      ), 
+                      React.createElement("p", null, React.createElement("strong", null, "Note:"), result.Description), 
+                      React.createElement("span", {className: "glyphicon glyphicon-thumbs-up"}, result.Likes)
+                )
+                )
+            )
+          )
+        )
+      )
+    )
+  }
+)
+      )
+    );
+  }
+});
+
+var ButtonClick = React.createClass({displayName: "ButtonClick",
+  buttonClick : function(){
+    $('#userNameForLike').val(window.localStorage.getItem('username'));
+    $('#blogLike').val(true);
+    var temp= $('#Liked').serialize();
+    console.log(temp);
+    if(temp){
+    actions.likedBlog(temp);
+    }
+  },
+  render : function(){
+    return(
+      React.createElement("div", null, 
+      React.createElement("form", {onClick: this.buttonClick, id: "Liked"}, 
+      React.createElement("input", {type: "hidden", name: "BlogTitle", value: this.props.results.Title}), 
+      React.createElement("input", {type: "hidden", id: "userNameForLike", name: "Username"}), 
+      React.createElement("input", {type: "hidden", id: "blogLike", name: "Like"}), 
+      React.createElement("button", {type: "button", className: "btn btn-info"}, "Like"), 
+      React.createElement("span", {className: "glyphicon glyphicon-thumbs-up"}, this.props.results.Likes)
       )
       )
     );
@@ -26432,30 +26560,51 @@ var Home = React.createClass({displayName: "Home",
 });
 
 var CreateBlog = React.createClass({displayName: "CreateBlog",
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      msg : null
+    }
+  },
+  onStore : function(data){
+    this.setState({msg:data})
+  },
+  handleBlogForm : function(){
+    var txt = "";
+    $('#uname').val(window.localStorage.getItem('username'));
+    $('#date').val(Date());
+    var x = document.getElementById("img");
+    if('files' in x){
+      var file = x.files[0];
+      if('name' in file){
+        $('#imgName').val(file.name);
+      }
+    }
+
+    var temp = $('#BlogDetails').serialize();
+    console.log(temp);
+    actions.addBlogToDB(temp);
+  },
+
   render : function(){
     return(
       React.createElement("div", null, 
-        React.createElement("p", null, "Create Your Blogs"), 
-        React.createElement("div", {className: "container"}, 
-        React.createElement("form", null, 
-                React.createElement("div", {className: "form-group"}, 
-                React.createElement("input", {type: "text", className: "form-control", placeholder: "Name", name: "name"})
-                 ), 
-                 React.createElement("div", {className: "form-group"}, 
-                 React.createElement("input", {type: "text", className: "form-control", placeholder: "Username", name: "username"})
-                  ), 
-                  React.createElement("div", {className: "form-group"}, 
-                  React.createElement("input", {type: "email", className: "form-control", placeholder: "Email", name: "email"})
-                   ), 
-                   React.createElement("div", {className: "form-group"}, 
-                   React.createElement("input", {type: "password", className: "form-control", placeholder: "Password", name: "password"})
-                    ), 
-                 React.createElement("div", {className: "form-group"}, 
-                 React.createElement("input", {type: "password", className: "form-control", placeholder: "Password", name: "password2"})
-                  ), 
-                  React.createElement("button", {type: "button", onClick: this.handleRegistrationForm, className: "btn btn-primary btn-block"}, "Submit")
-                  )
-                )
+      this.state.msg==null?
+        React.createElement("form", {id: "BlogDetails"}, 
+                React.createElement("div", {className: "title"}, "Create your Blog"), 
+                React.createElement("input", {type: "hidden", id: "uname", name: "username"}), 
+                React.createElement("input", {type: "text", placeholder: "Blog Title", name: "blogName"}), 
+                React.createElement("input", {type: "file", id: "img", placeholder: "Choose Image"}), 
+                React.createElement("input", {type: "hidden", id: "imgName", name: "image"}), 
+                React.createElement("input", {type: "text", placeholder: "Say Something Incredible about Image", name: "captions"}), 
+                React.createElement("textarea", {rows: "5", name: "descriptions", id: "comment", placeholder: "Type Interesting so People can read it"}), 
+                React.createElement("input", {type: "hidden", id: "date", name: "DateNtime"}), 
+                React.createElement("input", {type: "number", placeholder: "Likes", name: "Likes"}), 
+                React.createElement("button", {type: "button", onClick: this.handleBlogForm, className: "btn btn-primary btn-block"}, "Submit")
+        )
+        :React.createElement("div", null, React.createElement("p", null, "Blog added Successfully...!"))
       )
     );
   }
@@ -26512,6 +26661,7 @@ onStore : function(data){
     return(React.createElement("div", null, 
       this.state.username==null?
       React.createElement("div", {className: "container"}, 
+       React.createElement("div", {class: "title"}, "Register"), 
       React.createElement("form", {id: "registrationDetail"}, 
               React.createElement("div", {className: "form-group"}, 
               React.createElement("input", {type: "text", className: "form-control", placeholder: "Name", name: "name"})
@@ -26526,7 +26676,7 @@ onStore : function(data){
                  React.createElement("input", {type: "password", className: "form-control", placeholder: "Password", name: "password"})
                   ), 
                React.createElement("div", {className: "form-group"}, 
-               React.createElement("input", {type: "password", className: "form-control", placeholder: "Password", name: "password2"})
+               React.createElement("input", {type: "password", className: "form-control", placeholder: "Confirm Password", name: "password2"})
                 ), 
                 React.createElement("button", {type: "button", onClick: this.handleRegistrationForm, className: "btn btn-primary btn-block"}, "Submit")
                 )
@@ -26545,7 +26695,7 @@ var Login = React.createClass({displayName: "Login",
     loginData:data.username,
     msg : data.msg
   });
-
+console.log(data.username);
   window.localStorage.setItem("username", data.username);
   this.loginSuccess();
 },
@@ -26570,6 +26720,7 @@ handleLoginAuth : function(){
   render : function(){
     return(
       React.createElement("div", {className: "container"}, 
+       React.createElement("div", {class: "title"}, "Login"), 
       React.createElement("form", {id: "loginData"}, 
               React.createElement("div", {className: "form-group"}, 
                 React.createElement("input", {className: "form-control", name: "username", placeholder: "Enter a User Name...", type: "text"})
@@ -26588,7 +26739,8 @@ ReactDOM.render((
   React.createElement(Router, {history: browserHistory}, 
       React.createElement(Route, {path: "/", component: MainComp}, 
         React.createElement(Route, {path: "/register", component: Register}), 
-        React.createElement(Route, {path: "/home", component: Home}), 
+        React.createElement(Route, {path: "/HomeForStranger", component: HomeForStranger}), 
+        React.createElement(Route, {path: "/HomeForRegisterUser", component: HomeForRegisterUser}), 
         React.createElement(Route, {path: "/CreateBlog", component: CreateBlog}), 
         React.createElement(Route, {path: "/login", component: Login}), 
         React.createElement(Route, {path: "/Navbar", component: Navbar}), 
@@ -26644,62 +26796,39 @@ bindData:{},
          window.localStorage.clear();
          this.trigger();
        },
-
-       onSearchAndDisplayMovie : function(value){
+       onAddBlogToDB : function(value){
+         console.log("in store");
          console.log(value);
          $.ajax({
-           url: '/displaymovies',
-           data: value,
-           type: 'post',
-           success:function(data){
+                url: '/Blog/addBlog',
+                type:'post',
+                data: value,
+                success: function(data1) {
+                  console.log(data1);
+                  this.trigger(data1);
+                }.bind(this)
+              });
+       },
+       onFetchAllBlogsFromDB : function(){
+         $.ajax({
+           url: '/Blog/fetchBlog',
+           type: 'get',
+           success : function(data){
              console.log(data);
-             this.bindData = data;
-             console.log(this.bindData);
-             this.trigger(this.bindData);
+             this.trigger(data);
            }.bind(this)
          })
        },
-
-       onSearchAndAddToDb : function(value){
-         console.log(value);
+       onLikedBlog : function(value){
          $.ajax({
-             url:'/addToDB/addDB',
-             data:"Name="+value,
-             type:'post',
-             dataType: 'json',
-             cache: false,
-             success: function(e) {
-               console.log(e);
-               this.data2.msg = e;
-               this.trigger(this.data2.msg);
-             }.bind(this)
-             });
-       },
-
-       onDeleteSelectedMv : function(value){
-         $.ajax({
-           url: '/DeleteSelectedMovie',
-           type: 'post',
-           data : 'movieDeleteObj='+value,
-           success:function(data)
-           {
+           url:'/Like/setLike',
+           type : 'post',
+           data : value,
+           success : function(data){
              console.log(data);
-             
            }
-          })
-       },
-
-       onFetchMovieCont : function(){
-         $.ajax({
-           url: '/addMovie',
-           type: 'get',
-           success:function(data){
-
-             this.trigger(data);
-           }.bind(this)
-         });
+         })
        }
-
   });
 module.exports =store;
 },{"./Actions":248,"reflux":243}]},{},[249]);

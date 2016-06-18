@@ -16,10 +16,9 @@ var mongoose = require('mongoose');
 var routes = require('./api/routes/index');
 var users = require('./api/routes/users');
 var User = require('./modal/user');
-var display = require('./api/routes/displaydata');
-var send = require('./api/routes/movie');
+var send = require('./api/routes/Blog');
+var likePage = require('./api/routes/like');
 var dBconfig = require('./config/config.json');
-var deleteSelect = require('./api/routes/deleteSelected');
 var config = require('./config/main.js');
 var app = express();
 
@@ -105,12 +104,8 @@ app.use(function (req,res, next){
 
 
 app.use('/', routes);
-app.use('/delete',send);
-app.use('/DeleteSelectedMovie',deleteSelect);
-app.use('/addToDB',display);
-app.use('/displaymovies',display);
-app.use('/addMovie',send);
-app.use('/api',send);
+app.use('/Blog',send);
+app.use('/Like',likePage);
 app.use('/users', users);
 
 

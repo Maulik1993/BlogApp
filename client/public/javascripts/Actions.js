@@ -4,10 +4,9 @@ var actionComponent = Reflux.createActions([
   "handleRegistrationForm",
   "handleLoginAuth",
   "logOut",
-  "searchAndDisplayMovie",
-  "searchAndAddToDb",
-  "deleteSelectedMv",
-  "fetchMovieCont"
+  "addBlogToDB",
+  "fetchAllBlogsFromDB",
+  "likedBlog"
 ]);
 
 module.exports = actionComponent;

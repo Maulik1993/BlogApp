@@ -24,7 +24,9 @@ gulp.task('copy',function(){
     gulp.src('public/js/*.*')
         .pipe(gulp.dest('dist/js'));
     gulp.src('public/fonts/*.*')
-          .pipe(gulp.dest('dist/fonts'))
+          .pipe(gulp.dest('dist/fonts'));
+    gulp.src('public/images/*.*')
+          .pipe(gulp.dest('dist/images'));
 });
 
 gulp.task('default',['browserify','copy'],function(){

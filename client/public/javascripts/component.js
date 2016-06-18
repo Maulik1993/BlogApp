@@ -39,7 +39,11 @@ var Navbar =React.createClass({
            <span className="icon-bar"></span>
            <span className="icon-bar"></span>
          </button>
-          <a className="navbar-brand"><Link to={"/home"}>For You</Link></a>
+         {window.localStorage.getItem('username')==null?
+         <Link to={"/HomeForStranger"} className="navbar-brand">For You</Link>
+       :<Link to={"/HomeForRegisterUser"} className="navbar-brand">For You</Link>
+     }
+
         </div>
       			<div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 {
@@ -61,43 +65,189 @@ var Navbar =React.createClass({
   }
 });
 
-var Home = React.createClass({
+var HomeForRegisterUser = React.createClass({
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      result : []
+    }
+  },
+  onStore : function(data){
+    console.log("in onSotre");
+    console.log(data);
+    this.setState({result:data})
+  },
+  fetchAllBlogs : function(){
+    actions.fetchAllBlogsFromDB();
+  },
+  componentDidMount : function(){
+    this.fetchAllBlogs();
+  },
   render : function(){
     return(
       <div>
-      <h2>
-      Blogss are on the wayyyyyyyy-------------------
-      </h2>
+      {
+        this.state.result.map(function(result){
+        return(
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-md-12">
+              <div className="row">
+                <div className="col-md-8">
+                <div className="jumbotron">
+                      <h5>{result.Username}</h5>
+                      <span>{result.Timing}</span>
+                      <h2>{result.Title}</h2>
+                      <figure>
+                          <img src={"images/"+result.Images} alt={result.Title} />
+                          <figcaption>{result.Caption}</figcaption>
+                      </figure>
+                      <p><strong>Note:</strong>{result.Description}</p>
+                      <ButtonClick results={result}/>
+                </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+)}
+      </div>
+    );
+  }
+});
+
+
+
+var HomeForStranger = React.createClass({
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      result : []
+    }
+  },
+  onStore : function(data){
+    console.log("in onSotre");
+    console.log(data);
+    this.setState({result:data})
+  },
+  fetchAllBlogs : function(){
+    actions.fetchAllBlogsFromDB();
+  },
+  componentDidMount : function(){
+    this.fetchAllBlogs();
+  },
+  render : function(){
+    return(
+      <div>
+      {
+        this.state.result.map(function(result){
+        return(
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-md-12">
+              <div className="row">
+                <div className="col-md-8">
+                <div className="jumbotron">
+                      <h5>{result.Username}</h5>
+                      <span>{result.Timing}</span>
+                      <h2>{result.Title}</h2>
+                      <figure>
+                          <img src={"images/"+result.Images} alt={result.Title} />
+                          <figcaption>{result.Caption}</figcaption>
+                      </figure>
+                      <p><strong>Note:</strong>{result.Description}</p>
+                      <span className="glyphicon glyphicon-thumbs-up">{result.Likes}</span>
+                </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+)}
+      </div>
+    );
+  }
+});
+
+var ButtonClick = React.createClass({
+  buttonClick : function(){
+    $('#userNameForLike').val(window.localStorage.getItem('username'));
+    $('#blogLike').val(true);
+    var temp= $('#Liked').serialize();
+    console.log(temp);
+    if(temp){
+    actions.likedBlog(temp);
+    }
+  },
+  render : function(){
+    return(
+      <div>
+      <form onClick={this.buttonClick} id="Liked">
+      <input type="hidden" name="BlogTitle" value={this.props.results.Title}/>
+      <input type="hidden" id="userNameForLike" name="Username"/>
+      <input type="hidden" id="blogLike" name="Like" />
+      <button type="button" className="btn btn-info" >Like</button>
+      <span className="glyphicon glyphicon-thumbs-up">{this.props.results.Likes}</span>
+      </form>
       </div>
     );
   }
 });
 
 var CreateBlog = React.createClass({
+  mixins :[
+    Reflux.listenTo(store,"onStore")
+  ],
+  getInitialState: function(){
+    return {
+      msg : null
+    }
+  },
+  onStore : function(data){
+    this.setState({msg:data})
+  },
+  handleBlogForm : function(){
+    var txt = "";
+    $('#uname').val(window.localStorage.getItem('username'));
+    $('#date').val(Date());
+    var x = document.getElementById("img");
+    if('files' in x){
+      var file = x.files[0];
+      if('name' in file){
+        $('#imgName').val(file.name);
+      }
+    }
+
+    var temp = $('#BlogDetails').serialize();
+    console.log(temp);
+    actions.addBlogToDB(temp);
+  },
+
   render : function(){
     return(
       <div>
-        <p>Create Your Blogs</p>
-        <div className="container">
-        <form>
-                <div className="form-group">
-                <input type="text" className="form-control" placeholder="Name" name="name"/>
-                 </div>
-                 <div className="form-group">
-                 <input type="text" className="form-control" placeholder="Username" name="username"/>
-                  </div>
-                  <div className="form-group">
-                  <input type="email" className="form-control" placeholder="Email" name="email"/>
-                   </div>
-                   <div className="form-group">
-                   <input type="password" className="form-control" placeholder="Password" name="password"/>
-                    </div>
-                 <div className="form-group">
-                 <input type="password" className="form-control" placeholder="Password" name="password2"/>
-                  </div>
-                  <button type="button"  onClick={this.handleRegistrationForm}  className="btn btn-primary btn-block">Submit</button>
-                  </form>
-                </div>
+      {this.state.msg==null?
+        <form id="BlogDetails">
+                <div className="title">Create your Blog</div>
+                <input type="hidden" id="uname" name="username"/>
+                <input type="text"  placeholder="Blog Title" name="blogName"/>
+                <input type="file" id="img" placeholder="Choose Image" />
+                <input type="hidden" id="imgName" name="image" />
+                <input type="text"  placeholder="Say Something Incredible about Image" name="captions"/>
+                <textarea rows="5" name="descriptions" id="comment" placeholder="Type Interesting so People can read it"></textarea>
+                <input type="hidden" id="date" name="DateNtime"/>
+                <input type="number"  placeholder="Likes" name="Likes"/>
+                <button type="button"  onClick={this.handleBlogForm}  className="btn btn-primary btn-block">Submit</button>
+        </form>
+        :<div><p>Blog added Successfully...!</p></div>}
       </div>
     );
   }
@@ -154,6 +304,7 @@ onStore : function(data){
     return(<div>
       {this.state.username==null?
       <div className="container">
+       <div class="title">Register</div>
       <form id="registrationDetail">
               <div className="form-group">
               <input type="text" className="form-control" placeholder="Name" name="name"/>
@@ -168,7 +319,7 @@ onStore : function(data){
                  <input type="password" className="form-control" placeholder="Password" name="password"/>
                   </div>
                <div className="form-group">
-               <input type="password" className="form-control" placeholder="Password" name="password2"/>
+               <input type="password" className="form-control" placeholder="Confirm Password" name="password2"/>
                 </div>
                 <button type="button"  onClick={this.handleRegistrationForm}  className="btn btn-primary btn-block">Submit</button>
                 </form>
@@ -187,7 +338,7 @@ var Login = React.createClass({
     loginData:data.username,
     msg : data.msg
   });
-
+console.log(data.username);
   window.localStorage.setItem("username", data.username);
   this.loginSuccess();
 },
@@ -212,6 +363,7 @@ handleLoginAuth : function(){
   render : function(){
     return(
       <div className="container">
+       <div class="title">Login</div>
       <form id="loginData">
               <div className="form-group">
                 <input className="form-control" name="username" placeholder="Enter a User Name..." type="text" />
@@ -230,7 +382,8 @@ ReactDOM.render((
   <Router history={browserHistory}>
       <Route path="/" component={MainComp}>
         <Route path="/register" component={Register} />
-        <Route path="/home" component={Home} />
+        <Route path="/HomeForStranger" component={HomeForStranger} />
+        <Route path="/HomeForRegisterUser" component={HomeForRegisterUser} />
         <Route path="/CreateBlog" component={CreateBlog} />
         <Route path="/login" component={Login} />
         <Route path="/Navbar" component={Navbar} />
