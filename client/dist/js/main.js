@@ -26441,6 +26441,7 @@ var HomeForRegisterUser = React.createClass({displayName: "HomeForRegisterUser",
   },
   componentDidMount : function(){
     this.fetchAllBlogs();
+    setInterval(this.fetchAllBlogs , 1000);
   },
   render : function(){
     return(
@@ -26498,6 +26499,7 @@ var HomeForStranger = React.createClass({displayName: "HomeForStranger",
   },
   componentDidMount : function(){
     this.fetchAllBlogs();
+    setInterval(this.fetchAllBlogs , 1000);
   },
   render : function(){
     return(
@@ -26521,7 +26523,7 @@ var HomeForStranger = React.createClass({displayName: "HomeForStranger",
                       React.createElement("p", null, React.createElement("strong", null, "Note:"), result.Description), 
                       React.createElement("span", {className: "glyphicon glyphicon-thumbs-up"}, result.Likes)
                 )
-                )
+              )
             )
           )
         )
@@ -26538,6 +26540,8 @@ var ButtonClick = React.createClass({displayName: "ButtonClick",
   buttonClick : function(){
     $('#userNameForLike').val(window.localStorage.getItem('username'));
     $('#blogLike').val(true);
+  var Title= $('#blogTitle').val(this.props.results.Title);
+    console.log(Title);
     var temp= $('#Liked').serialize();
     console.log(temp);
     if(temp){
@@ -26548,7 +26552,7 @@ var ButtonClick = React.createClass({displayName: "ButtonClick",
     return(
       React.createElement("div", null, 
       React.createElement("form", {onClick: this.buttonClick, id: "Liked"}, 
-      React.createElement("input", {type: "hidden", name: "BlogTitle", value: this.props.results.Title}), 
+      React.createElement("input", {type: "hidden", id: "blogTitle", name: "BlogTitle"}), 
       React.createElement("input", {type: "hidden", id: "userNameForLike", name: "Username"}), 
       React.createElement("input", {type: "hidden", id: "blogLike", name: "Like"}), 
       React.createElement("button", {type: "button", className: "btn btn-info"}, "Like"), 

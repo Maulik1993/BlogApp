@@ -17,8 +17,10 @@ router.post('/setLike',function(request,respond){
         }else{
           Blog.find({Title: request.body.BlogTitle}, function (err, user) {
             console.log(user);
-            console.log(user.Title);
-              Blog.update({Title : request.body.Title},{$inc : {Likes : 1}});
+            user[0].Likes += 1;
+            user[0].save(function(err){
+              if(err) throw err;
+            });
           });
       respond.json({ message: 'Liked added!' });
       }

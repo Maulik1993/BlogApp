@@ -84,6 +84,7 @@ var HomeForRegisterUser = React.createClass({
   },
   componentDidMount : function(){
     this.fetchAllBlogs();
+    setInterval(this.fetchAllBlogs , 1000);
   },
   render : function(){
     return(
@@ -141,6 +142,7 @@ var HomeForStranger = React.createClass({
   },
   componentDidMount : function(){
     this.fetchAllBlogs();
+    setInterval(this.fetchAllBlogs , 1000);
   },
   render : function(){
     return(
@@ -164,7 +166,7 @@ var HomeForStranger = React.createClass({
                       <p><strong>Note:</strong>{result.Description}</p>
                       <span className="glyphicon glyphicon-thumbs-up">{result.Likes}</span>
                 </div>
-                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -181,6 +183,8 @@ var ButtonClick = React.createClass({
   buttonClick : function(){
     $('#userNameForLike').val(window.localStorage.getItem('username'));
     $('#blogLike').val(true);
+  var Title= $('#blogTitle').val(this.props.results.Title);
+    console.log(Title);
     var temp= $('#Liked').serialize();
     console.log(temp);
     if(temp){
@@ -191,7 +195,7 @@ var ButtonClick = React.createClass({
     return(
       <div>
       <form onClick={this.buttonClick} id="Liked">
-      <input type="hidden" name="BlogTitle" value={this.props.results.Title}/>
+      <input type="hidden" id="blogTitle" name="BlogTitle"/>
       <input type="hidden" id="userNameForLike" name="Username"/>
       <input type="hidden" id="blogLike" name="Like" />
       <button type="button" className="btn btn-info" >Like</button>
