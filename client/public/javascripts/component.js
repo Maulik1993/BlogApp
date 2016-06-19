@@ -191,6 +191,7 @@ var ButtonClick = React.createClass({
     actions.likedBlog(temp);
     }
   },
+
   render : function(){
     return(
       <div>
@@ -198,7 +199,7 @@ var ButtonClick = React.createClass({
       <input type="hidden" id="blogTitle" name="BlogTitle"/>
       <input type="hidden" id="userNameForLike" name="Username"/>
       <input type="hidden" id="blogLike" name="Like" />
-      <button type="button" className="btn btn-info" >Like</button>
+      <button id="LikedButton" type="button" className="btn btn-info" >Like</button>
       <span className="glyphicon glyphicon-thumbs-up">{this.props.results.Likes}</span>
       </form>
       </div>

@@ -13,6 +13,7 @@ router.get('/register', function(req, res){
 	res.render('register');
 });
 
+
 router.post('/login',function(req,res) {
    console.log('post route on /api/users/login invoked.');
    User.getUserByUsername(req.body.username, function(err,user) {
